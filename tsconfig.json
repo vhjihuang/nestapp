@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "esnext",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "pretty": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "importsNotUsedAsValues": "remove",
+    "noEmit": false,
+    "lib": ["esnext", "dom", "ScriptHost", "WebWorker"],  // 添加 "dom" 以便支持 DOM API
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+  },
+  "include": ["src", "test", "typings/**/*.d.ts", "**.js"]
+}
