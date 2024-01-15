@@ -43,7 +43,6 @@ module.exports = {
     'no-return-wait': 0,
     'no-unused-vars': 0,
     'no-multi-assign': 0,
-    'no-params-reassign': [2, { props: false }],
     'import/prefer-default-export': 0,
     'import/no-cycle': 0,
     'import/no-dynamic-require': 0,
@@ -74,7 +73,7 @@ module.exports = {
     ],
     // 模块导入顺序
     'import/order': [
-      'error',
+      1,
       {
         pathGroups: [
           {
