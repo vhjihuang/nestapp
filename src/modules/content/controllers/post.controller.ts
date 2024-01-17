@@ -1,7 +1,20 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  ValidationPipe,
+} from '@nestjs/common';
+
+import { isNil } from 'lodash';
 
 import { PostEntity } from '../type';
-import { isNil } from 'lodash';
+import { CreatePostDto } from '../dtos/create-post.dto';
+import { UpdatePostDto } from '../dtos/update-post.dto';
 
 let posts: PostEntity[] = [
   {
@@ -44,7 +57,18 @@ export class PostController {
   }
 
   @Post()
-  async store(@Body() data: PostEntity) {
+  async store(
+    @Body(
+      new ValidationPipe({
+        transform: true, // 自动转换DTO
+        forbidNonWhitelisted: true,
+        forbidUnknownValues: true,
+        validationError: { target: false },
+        groups: ['create'],
+      }),
+    )
+    data: CreatePostDto,
+  ) {
     const newPost: PostEntity = {
       id: Math.max(...posts.map((v) => v.id + 1)),
       ...data,
@@ -54,7 +78,18 @@ export class PostController {
   }
 
   @Patch()
-  async update(@Body() data: PostEntity) {
+  async update(
+    @Body(
+      new ValidationPipe({
+        transform: true, // 自动转换DTO
+        forbidNonWhitelisted: true,
+        forbidUnknownValues: true,
+        validationError: { target: false },
+        groups: ['update'],
+      }),
+    )
+    data: UpdatePostDto,
+  ) {
     let toUpdate = posts.find((v) => v.id === +data.id);
     if (isNil(toUpdate)) throw new NotFoundException(`the post with id ${data.id} not exits!`);
     toUpdate = { ...toUpdate, ...data };
