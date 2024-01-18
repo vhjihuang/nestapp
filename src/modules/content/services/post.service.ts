@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PostEntity } from '../type';
+
 import { isNil } from 'lodash';
+
 import { CreatePostDto } from '../dtos/create-post.dto';
 import { UpdatePostDto } from '../dtos/update-post.dto';
+import { PostEntity } from '../type';
 
 @Injectable()
 export class PostService {
