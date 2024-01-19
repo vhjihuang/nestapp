@@ -7,6 +7,9 @@ import { ThirdService } from './services/third.service';
 import { TestController } from './controllers/test.controller';
 import { FifthService } from './services/fifth.service';
 import { SixthService } from './services/sixth.service';
+import { SeventhService } from './services/seventh.service';
+import { EighthService } from './services/eighth.service';
+import { ContentModule } from '../content/content.module';
 
 const firstObject = {
   useValue: () => 'useValue提供者',
@@ -16,6 +19,7 @@ const firstObject = {
 const firstInstance = new FirstService();
 
 @Module({
+  imports: [ContentModule],
   providers: [
     FifthService,
     SixthService,
@@ -50,6 +54,8 @@ const firstInstance = new FirstService();
         return factory.getContentAsync();
       },
     },
+    SeventhService,
+    EighthService,
   ],
   controllers: [TestController],
 })
