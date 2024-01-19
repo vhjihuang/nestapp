@@ -6,6 +6,7 @@ import { FifthService } from '../services/fifth.service';
 import { SeventhService } from '../services/seventh.service';
 import { EighthService } from '../services/eighth.service';
 import { PostService } from '@/modules/content/services/post.service';
+import { DynamicService } from '@/modules/dynamic/services/dynamic.service';
 import { ConfigService } from '@/modules/core/services/config.service';
 
 @Controller('test')
@@ -21,11 +22,17 @@ export class TestController {
     @Inject('ASYNC-EXAMPLE') private acExp: SecondService,
     private postService: PostService,
     private configService: ConfigService,
+    private dynamicService: DynamicService,
   ) {}
 
   @Get('name')
   async name() {
     return this.configService.get('name');
+  }
+
+  @Get('dynamic')
+  async dynamic() {
+    return this.dynamicService.getter('name');
   }
 
   @Get('posts')
