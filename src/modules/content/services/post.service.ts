@@ -2,12 +2,30 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { isNil } from 'lodash';
 
-import { CreatePostDto } from '../dtos/create-post.dto';
-import { UpdatePostDto } from '../dtos/update-post.dto';
+// import { CreatePostDto } from '../dtos/create-post.dto';
+// import { UpdatePostDto } from '../dtos/update-post.dto';
+import { IsNull, Not, SelectQueryBuilder } from 'typeorm';
+
+import { PostOrderType } from '@/modules/database/constants';
+import { PaginateOptions, QueryHook } from '@/modules/database/types';
+
+import { PostRepository } from '../repositories';
 import { PostEntity } from '../type';
 
 @Injectable()
 export class PostService {
+  constructor(protected repository: PostRepository) {}
+
+  /*
+  获取分页数据
+  @param options 分页选项
+  @param callback 添加额外的查询
+  */
+  async paginate(options: PaginateOptions, callback?: QueryHook<PostEntity>) {
+    const qb = await this.buildListQuery(this.repository.buildBaseQB(), options, callback);
+    return paginate(qb, options);
+  }
+
   protected posts: PostEntity[] = [
     { title: '第一篇文章标题', body: '第一篇文章内容' },
     { title: '第二篇文章标题', body: '第二篇文章内容' },
@@ -15,6 +33,52 @@ export class PostService {
     { title: '第四篇文章标题', body: '第四篇文章内容' },
     { title: '第五篇文章标题', body: '第五篇文章内容' },
   ].map((v, id) => ({ ...v, id }));
+
+  /*
+  构建文章列表查询器
+  @param qb 初始查询构造器
+  @param options 排查分页选项后的查询选项
+  @param callback 添加额外的查询
+  */
+  protected buildListQuery(
+    qb: SelectQueryBuilder<PostEntity>,
+    options: Record<string, any>,
+    callback?: QueryHook<PostEntity>,
+  ) {
+    const { orderBy, isPublished } = options;
+    let newQB = qb;
+    if (typeof isPublished === 'boolean') {
+      newQB = isPublished
+        ? newQB.where({ publishedAt: Not(IsNull()) })
+        : newQB.where({ publishedAt: IsNull() });
+    }
+    newQB = this.queryOrderBy(newQB, orderBy);
+    if (callback) callback(newQB);
+    return newQB;
+  }
+
+  /*
+  对文章进行排序的Query构建
+  @param qb
+  @param orderBy 排序方式
+  */
+  protected queryOrderBy(qb: SelectQueryBuilder<PostEntity>, orderBy?: string) {
+    switch (orderBy) {
+      case PostOrderType.CREATED:
+        return qb.orderBy('post.createdAt', 'DESC');
+      case PostOrderType.UPDATED:
+        return qb.orderBy('post.updated', 'DESC');
+      case PostOrderType.PUBLISHED:
+        return qb.orderBy('post.publishedAt', 'DESC');
+      case PostOrderType.CUSTOM:
+        return qb.orderBy('post.customOrder', 'DESC');
+      default:
+        return qb
+          .orderBy('post.createdAt', 'DESC')
+          .addOrderBy('post.updated', 'DESC')
+          .addOrderBy('post.publishedAt', 'DESC');
+    }
+  }
 
   async findAll() {
     return this.posts;
@@ -26,7 +90,7 @@ export class PostService {
     return post;
   }
 
-  async create(data: CreatePostDto) {
+  async create(data) {
     const newPost: PostEntity = {
       id: Math.max(...this.posts.map(({ id }) => id + 1)),
       ...data,
@@ -35,7 +99,7 @@ export class PostService {
     return newPost;
   }
 
-  async update(data: UpdatePostDto) {
+  async update(data) {
     let toUpdate = this.posts.find(({ id }) => id === data.id);
     if (isNil(toUpdate)) throw new NotFoundException(`the post with id  ${data.id} not exits!`);
     toUpdate = { ...toUpdate, ...data };

@@ -10,8 +10,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 
-import { CreatePostDto } from '../dtos/create-post.dto';
-import { UpdatePostDto } from '../dtos/update-post.dto';
+// import { CreatePostDto } from '../dtos/create-post.dto';
+// import { UpdatePostDto } from '../dtos/update-post.dto';
 import { PostService } from '../services/post.service';
 
 @Controller('posts')
@@ -39,7 +39,7 @@ export class PostController {
         groups: ['create'],
       }),
     )
-    data: CreatePostDto,
+    data,
   ) {
     return this.postService.create(data);
   }
@@ -55,7 +55,7 @@ export class PostController {
         groups: ['update'],
       }),
     )
-    data: UpdatePostDto,
+    data,
   ) {
     console.log('data', data);
     return this.postService.update(data);
