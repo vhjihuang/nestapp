@@ -3,11 +3,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { PostBodyType } from '@/modules/database/constants';
+
+import { CommentEntity } from './comment.entity';
 
 @Entity('content_post')
 export class PostEntity extends BaseEntity {
@@ -50,4 +54,9 @@ export class PostEntity extends BaseEntity {
 
   @UpdateDateColumn({ comment: '更新时间' })
   updatedAt: Date;
+
+  @OneToMany(() => CommentEntity, (comment) => comment.post, {
+    cascade: true,
+  })
+  comments: Relation<CommentEntity>;
 }

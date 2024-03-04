@@ -1,7 +1,7 @@
 import { isNil } from 'lodash';
 import { ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 
-import { PaginateOptions, PaginateReturn } from './types';
+import { OrderQueryType, PaginateOptions, PaginateReturn } from './types';
 
 /*
 分页函数
@@ -32,4 +32,30 @@ export const paginate = async <E extends ObjectLiteral>(
       currentPage: page,
     },
   };
+};
+
+/*
+为查询添加排序,默认排序规则为 DESC
+@Param SelectQueryBuilder qb 原查询
+@Param string alias 别名
+@Param OrderQueryType, orderBy 查询排序
+ */
+export const getOrderByQuery = <E extends ObjectLiteral>(
+  qb: SelectQueryBuilder<E>,
+  alias: string,
+  orderBy?: OrderQueryType,
+) => {
+  if (isNil(orderBy)) return qb;
+  if (typeof orderBy === 'string') return qb.orderBy(`${alias}.${orderBy}`, 'DESC');
+  if (Array.isArray(orderBy)) {
+    for (const item of orderBy) {
+      // 此句判断不够严谨, 不为 string 还是有好几种基础类型,现在直接默认为对象了
+      typeof item === 'string'
+        ? qb.addOrderBy(`${alias}.${orderBy}`, 'DESC')
+        : qb.addOrderBy(`${alias}.${item.name}`, item.order);
+    }
+    return qb;
+  }
+  // 此句代码也不够严谨
+  return qb.orderBy(`${alias}.${(orderBy as any).name}`, (orderBy as any).order);
 };

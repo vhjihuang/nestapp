@@ -7,10 +7,13 @@ import { isNil } from 'lodash';
 import { IsNull, Not, SelectQueryBuilder } from 'typeorm';
 
 import { PostOrderType } from '@/modules/database/constants';
+import { paginate } from '@/modules/database/helpers';
 import { PaginateOptions, QueryHook } from '@/modules/database/types';
 
+import { PostEntity } from '../entities';
 import { PostRepository } from '../repositories';
-import { PostEntity } from '../type';
+
+// import { PostEntity } from '../type';
 
 @Injectable()
 export class PostService {
@@ -58,11 +61,27 @@ export class PostService {
   }
 
   /*
+  构建 mysql 全文搜索的 sql
+  @Param qb
+  @Param search
+   */
+  protected async buildSearchQuery(qb: SelectQueryBuilder<PostEntity>, search: string) {
+    qb.andWhere('title LIKE :search', { search: `%${search}%` })
+      .orWhere('body LIKE :search', { search: `%${search}%` })
+      .orWhere('summary LIKE :search', { search: `%${search}%` })
+      .orWhere('category.name LIKE :search', { search: `%${search}%` })
+      .orWhere('tags.name LIKE :search', { search: `%${search}%` })
+      .orWhere('author.UserName LIKE :search', { search: `%${search}%` })
+      .orWhere('author.nickname LIKE :search', { search: `%${search}%` });
+    return qb;
+  }
+
+  /*
   对文章进行排序的Query构建
   @param qb
   @param orderBy 排序方式
   */
-  protected queryOrderBy(qb: SelectQueryBuilder<PostEntity>, orderBy?: string) {
+  protected queryOrderBy(qb: SelectQueryBuilder<PostEntity>, orderBy?: PostOrderType) {
     switch (orderBy) {
       case PostOrderType.CREATED:
         return qb.orderBy('post.createdAt', 'DESC');
